@@ -1,0 +1,5 @@
+export enum STATUS {
+  STARTED = "STARTED",
+  APPROVED = "APPROVED",
+  DONE = "DONE",
+}
