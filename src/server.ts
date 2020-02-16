@@ -1,7 +1,6 @@
 import http from "http";
 import fs from "fs";
 
-
 import app from "./app";
 import config from "./config/env";
 import { createDBConnection } from "./config/typeorm";
@@ -36,10 +35,10 @@ createDBConnection()
     });
 
     const logDir = "files";
-// create log folder
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir);
-}
+    // create log folder
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir);
+    }
   })
   .catch(err => {
     customLogger.info(`DB Connection failure!, ${err.message}`);
