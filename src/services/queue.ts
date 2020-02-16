@@ -34,7 +34,6 @@ const createVideoQueue = (newJob:any) => {
         ytdl(data.url)
           .on("progress", (length, downloaded, totallength) => {
             const progress = (downloaded / totallength) * 100;
-            customLogger.info(`progress`);
             global.io.emit("progress", { progress, jobId: data.id });
             if (progress >= 100) {
               global.io.emit("videoDone", { fileLocation: `${uuid}.mp4`, jobId: data.id });
@@ -46,7 +45,6 @@ const createVideoQueue = (newJob:any) => {
             resolve();
           });
       });
-      console.log("done");
       await jobRepository
         .createQueryBuilder()
         .update()
@@ -56,7 +54,6 @@ const createVideoQueue = (newJob:any) => {
 
       done();
     } catch (ex) {
-      console.log(ex, "error");
       customLogger.error(ex);
       job.moveToFailed();
     }
