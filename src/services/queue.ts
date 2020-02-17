@@ -34,7 +34,7 @@ const createVideoQueue = (newJob: Job) => {
             const progress = (downloaded / totallength) * 100;
             global.io.emit("progress", { progress, jobId: data.id });
             if (progress >= 100) {
-              global.io.emit("videoDone", { fileLocation: `${uuid}.mp4`, jobId: data.id });
+              global.io.emit("video_done", { fileLocation: `${uuid}.mp4`, jobId: data.id });
               global.io.emit("progress", { progress: 100, jobId: data.id });
             }
           })
