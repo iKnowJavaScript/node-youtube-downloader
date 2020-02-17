@@ -13,9 +13,19 @@ import { STATUS } from "../typings/enum";
 const router = Router();
 
 router.route("/new").post(async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-  const jobRepository = await getConnection().getRepository(Job);
   try {
+    const jobRepository = await getConnection().getRepository(Job);
+
     const url = req.body.url;
+
+    const jobAvailable = await jobRepository.findOne({ url });
+    if (jobAvailable) {
+      const file = path.resolve(__dirname, `../../files/${jobAvailable.id}`);
+      if (file) {
+        res.download(file);
+      }
+    }
+
     const isValidUrl = ytdl.validateURL(url);
     if (!isValidUrl) {
       res.status(400);
