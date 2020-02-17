@@ -51,6 +51,11 @@ router.route("/new").post(async (req: ExtendedRequest, res: Response, next: Next
 router.route("/file/:fileName").get(async (req: ExtendedRequest, res: Response, next: NextFunction) => {
   const fileName = req.params.fileName;
   const file = path.resolve(__dirname, `../../files/${fileName}`);
+
+  if (!file) {
+    res.statusCode = httpStatus.NOT_FOUND;
+    return res.json(sendResponse(httpStatus.NOT_FOUND, "Video not found", null));
+  }
   res.download(file);
 });
 
