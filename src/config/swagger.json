@@ -1,0 +1,123 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Youtube downloader",
+    "description": "An API to manage products"
+  },
+  "servers": [
+    {
+      "url": "/download/api/v1",
+      "description": "Containerize Version"
+    },
+    {
+      "url": "/api/v1",
+      "description": "Local Dev, or from testing"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Youtube downloader",
+      "description": "API for youtube downloader"
+    }
+  ],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/health-check": {
+      "get": {
+        "tags": ["Health Check"],
+        "summary": "Check the status of the service",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        },
+        "content": {
+          "application/json": {}
+        },
+        "parameters": []
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products in system",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "description": "requested page",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "take",
+            "required": true,
+            "description": "number of requested product per page",
+            "schema": {
+              "$ref": "#/definitions/id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Products"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "id": {
+      "properties": {
+        "uuid": {
+          "type": "number"
+        }
+      }
+    },
+    "Product": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "uniqueItems": true,
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "required": true
+        }
+      }
+    },
+    "Products": {
+      "type": "object",
+      "properties": {
+        "products": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Product"
+          }
+        }
+      }
+    }
+  }
+}
