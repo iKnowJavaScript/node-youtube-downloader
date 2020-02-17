@@ -35,7 +35,7 @@ createDBConnection()
     });
 
     const logDir = "files";
-    // create log folder
+    // temporary file saver
     if (!fs.existsSync(logDir)) {
       fs.mkdirSync(logDir);
     }
