@@ -1,21 +1,32 @@
 import { Router, Response, NextFunction } from "express";
 import { getConnection } from "typeorm";
 import httpStatus from "http-status";
-import sendResponse from "../helper/response";
-import ExtendedRequest from "../typings/extends.interface";
-import { customLogger } from "../config/logger";
-import { createVideoQueue } from "../services/queue";
 import ytdl from "ytdl-core";
 import path from "path";
-import { Job } from "../entity";
+
+import ExtendedRequest from "../typings/extends.interface";
+import createVideoQueue from "../services/queue";
+import { customLogger } from "../config/logger";
+import sendResponse from "../helper/response";
 import { STATUS } from "../typings/enum";
+import { Job } from "../entity";
 
 const router = Router();
 
 router.route("/new").post(async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-  const jobRepository = await getConnection().getRepository(Job);
   try {
+    const jobRepository = await getConnection().getRepository(Job);
+
     const url = req.body.url;
+
+    const jobAvailable = await jobRepository.findOne({ url });
+    if (jobAvailable) {
+      const file = path.resolve(__dirname, `../../files/${jobAvailable.id}`);
+      if (file) {
+        res.download(file);
+      }
+    }
+
     const isValidUrl = ytdl.validateURL(url);
     if (!isValidUrl) {
       res.status(400);
@@ -41,7 +52,32 @@ router.route("/new").post(async (req: ExtendedRequest, res: Response, next: Next
 router.route("/file/:fileName").get(async (req: ExtendedRequest, res: Response, next: NextFunction) => {
   const fileName = req.params.fileName;
   const file = path.resolve(__dirname, `../../files/${fileName}`);
+
+  if (!file) {
+    res.statusCode = httpStatus.NOT_FOUND;
+    return res.json(sendResponse(httpStatus.NOT_FOUND, "Video not found", null));
+  }
   res.download(file);
+});
+
+router.route("/:status").get(async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+  const status = req.params.status as STATUS;
+
+  if (!status) {
+    res.statusCode = httpStatus.BAD_REQUEST;
+    return res.json(sendResponse(httpStatus.BAD_REQUEST, "Invalid status", null));
+  }
+
+  try {
+    const jobRepository = await getConnection().getRepository(Job);
+    const jobs = await jobRepository.find({ status });
+
+    res.json(sendResponse(httpStatus.OK, "succesful", jobs));
+  } catch (err) {
+    res.status(400);
+    customLogger.error(err);
+    next(err);
+  }
 });
 
 export default router;

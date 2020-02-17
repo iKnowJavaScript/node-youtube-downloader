@@ -1,10 +1,7 @@
 import Queue from "bull";
 import { Job } from "../entity";
 import ytdl from "ytdl-core";
-import uuidv1 from "uuid/v1";
-import util from "util";
 import fs from "fs";
-
 
 import { customLogger } from "../config/logger";
 import { getConnection } from "typeorm";
@@ -13,13 +10,14 @@ import config from "../config/env";
 import { ExtendedGlobal } from "../typings/extends.interface";
 declare const global: ExtendedGlobal;
 
-const createVideoQueue = (newJob:any) => {
+const createVideoQueue = (newJob: Job) => {
   const videoQueue = new Queue("video transcoding", {
     redis: {
       port: config.REDIS_CONFIG.REDIS_PORT,
       host: config.REDIS_CONFIG.REDIS_HOST,
     },
   });
+
   videoQueue.process(async (job: any, done) => {
     const jobRepository = await getConnection().getRepository(Job);
 
@@ -27,7 +25,7 @@ const createVideoQueue = (newJob:any) => {
     try {
       job.progress(0);
       global.io.emit("progress", { progress: 0, jobId: data.id });
-      const uuid = uuidv1();
+      const uuid = newJob.id;
       const fileLocation = `./files/${uuid}.mp4`;
 
       await new Promise(resolve => {
@@ -60,4 +58,4 @@ const createVideoQueue = (newJob:any) => {
   });
   return videoQueue;
 };
-export { createVideoQueue };
+export default createVideoQueue;
