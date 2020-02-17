@@ -56,6 +56,7 @@ const createVideoQueue = (newJob: Job) => {
       job.moveToFailed();
     }
   });
+  
   return videoQueue;
 };
 export default createVideoQueue;
