@@ -20,10 +20,11 @@ router.route("/new").post(async (req: ExtendedRequest, res: Response, next: Next
     const url = req.body.url;
 
     const jobAvailable = await jobRepository.findOne({ url });
-    if (jobAvailable) {
-      const file = path.resolve(__dirname, `../../files/${jobAvailable.id}`);
+    if (jobAvailable && jobAvailable.file_location) {
+      let file = path.resolve(__dirname, `../../files/${jobAvailable.file_location}`);
       if (file) {
-        res.download(file);
+        res.status = httpStatus.FOUND as any;
+        return res.json(sendResponse(httpStatus.FOUND, "succesful", jobAvailable));
       }
     }
 
