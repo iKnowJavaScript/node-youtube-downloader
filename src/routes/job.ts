@@ -20,10 +20,11 @@ router.route("/new").post(async (req: ExtendedRequest, res: Response, next: Next
     const url = req.body.url;
 
     const jobAvailable = await jobRepository.findOne({ url });
-    if (jobAvailable) {
-      const file = path.resolve(__dirname, `../../files/${jobAvailable.id}`);
+    if (jobAvailable && jobAvailable.file_location) {
+      let file = path.resolve(__dirname, `../../files/${jobAvailable.file_location}`);
       if (file) {
-        res.download(file);
+        res.status = httpStatus.FOUND as any;
+        return res.json(sendResponse(httpStatus.FOUND, "succesful", jobAvailable));
       }
     }
 
@@ -63,6 +64,10 @@ router.route("/file/:fileName").get(async (req: ExtendedRequest, res: Response, 
 router.route("/:status").get(async (req: ExtendedRequest, res: Response, next: NextFunction) => {
   const status = req.params.status as STATUS;
 
+  let { page = 0, take = 10 } = req.query;
+  (page = +page), (take = +take);
+  const skip = page * take;
+
   if (!status) {
     res.statusCode = httpStatus.BAD_REQUEST;
     return res.json(sendResponse(httpStatus.BAD_REQUEST, "Invalid status", null));
@@ -70,7 +75,16 @@ router.route("/:status").get(async (req: ExtendedRequest, res: Response, next: N
 
   try {
     const jobRepository = await getConnection().getRepository(Job);
-    const jobs = await jobRepository.find({ status });
+    const jobs = await jobRepository.find({
+      order: {
+        title: "ASC",
+      },
+      skip,
+      take,
+      where: {
+        status,
+      },
+    });
 
     res.json(sendResponse(httpStatus.OK, "succesful", jobs));
   } catch (err) {
