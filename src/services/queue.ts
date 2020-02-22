@@ -26,15 +26,21 @@ const createVideoQueue = (newJob: Job) => {
       job.progress(0);
       global.io.emit("progress", { progress: 0, jobId: data.id });
       const uuid = newJob.id;
+      let size;
+      let title;
       const fileLocation = `./files/${uuid}.mp4`;
 
       await new Promise(resolve => {
         ytdl(data.url)
-          .on("progress", (length, downloaded, totallength) => {
+          .on("info", info => {
+            title = info.title;
+          })
+          .on("progress", (length, downloaded, totallength, title) => {
             const progress = (downloaded / totallength) * 100;
+            size = totallength / 1000000;
             global.io.emit("progress", { progress, jobId: data.id });
             if (progress >= 100) {
-              global.io.emit("videoDone", { fileLocation: `${uuid}.mp4`, jobId: data.id });
+              global.io.emit("video_done", { fileLocation: `${uuid}.mp4`, jobId: data.id });
               global.io.emit("progress", { progress: 100, jobId: data.id });
             }
           })
@@ -46,7 +52,7 @@ const createVideoQueue = (newJob: Job) => {
       await jobRepository
         .createQueryBuilder()
         .update()
-        .set({ status: STATUS.DONE, file_location: `${uuid}.mp4` })
+        .set({ status: STATUS.DONE, file_location: `${uuid}.mp4`, size, title })
         .where("id = :id", { id: newJob.id })
         .execute();
 
@@ -56,6 +62,7 @@ const createVideoQueue = (newJob: Job) => {
       job.moveToFailed();
     }
   });
+
   return videoQueue;
 };
 export default createVideoQueue;
