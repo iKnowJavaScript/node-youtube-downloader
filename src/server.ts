@@ -10,6 +10,7 @@ declare const global: ExtendedGlobal;
 
 const port = config.APP_PORT;
 const server = http.createServer(app);
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const io = require("socket.io")(server, { origins: "*:*" });
 
 global.io = io;
@@ -44,5 +45,3 @@ createDBConnection()
     customLogger.info(`DB Connection failure!, ${err.message}`);
     customLogger.error(err);
   });
-
-//492.77 - 1953.14 -b1649.45
