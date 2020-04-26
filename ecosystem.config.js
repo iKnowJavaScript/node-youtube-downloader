@@ -1,12 +1,12 @@
 module.exports = {
   apps: [
     {
-      name: "br-whitelabelling-config-ms",
+      name: "youtube-downloader-service",
       script: "./dist/server.js",
 
       // Options reference: https://pm2.keymetrics.io/docs/usage/application-declaration/
       args: "one two",
-      instances: 1,
+      instances: 2,
       autorestart: true,
       watch: false,
       max_memory_restart: "1G",
