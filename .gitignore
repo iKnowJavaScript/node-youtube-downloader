@@ -16,6 +16,7 @@ build/
 temp/
 dist/
 .vscode
+youtube-downloader.code-workspace
 
 # Build
 public/css/main.css
